@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover,user-scalable=0" />
+		<title>芋泥的烟花</canvas></title>
+		<link rel="icon" href="./img/favicon0.ico" / type="image/x-icon">
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				cursor: url(./img/favicon0.ico),auto;
+				/* overflow: hidden; */
+			}
+
+			#canvas {
+				background: #000;
+				display: block;
+			}
+			
+			#me{
+				display: none;
+				width: 51px;
+				height: 55px;
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				background-size: 100% 100%;
+				background-image: url(img/me.png);
+				z-index: 8;
+			}
+			#dialog{
+				/* width: 40px;
+				height: auto; */
+				display: none;
+				padding: 2px 5px;
+				position: absolute;
+				/* position: relative; */
+				bottom: 65px;
+				left: 10px;
+				color: aliceblue;
+				border: 2px solid #00d0be;
+				border-radius: 2px;
+				/* animation: dialog 3s linear; */
+			}
+			#dialog p{
+				position: relative;
+			}
+			#dialog span#after{
+				content: '';
+				width: 0px;
+				height: 0px;
+				/* background-color: #FFFFFF; */
+				position: absolute;
+				top: calc(100% + 2px);
+				left: 7px;
+				margin-left: -8px;
+				border-top: 8px solid #00D0BE;
+				border-right: 8px solid transparent;
+				border-left: 8px solid transparent;
+				z-index: 10;
+			}
+			@keyframes dialog{
+				from{opacity: 1;}
+				to{opacity: 0;display: none;}
+			}
+		</style>
+		<!-- <script>
+			
+		</script> -->
+	</head>
+	<body>
+		<audio id="audio" src="./img/bg1-1.mp3" autoplay loop></audio>
+		<span id="dialog"><p>爱你❤</p><span id="after"></span></span>
+		<div id="me"></div>
+		<canvas id="canvas">您的浏览器版本过低，请更换浏览器！</canvas>
+		<script>
+			var can = document.getElementById('canvas');
+			var ctx = can.getContext('2d');
+			var w = can.width = window.innerWidth;
+			var h = can.height = window.innerHeight;
+
+			var count = 30;
+			var drops = [];
+			var starlist = [];
+			window.οnresize = function() {
+				w = can.width = window.innerWidth;
+				h = can.height = window.innerHeight;
+			};
+			
+			function Drop() {}
+			Drop.prototype = {
+				init: function() {
+					this.x = random(0, w);
+					// this.y = 0;
+					this.y = h + 10;
+					this.r = 1;//圆的半径
+					this.color = '#0ff';
+					this.vy = random(4, 5);//Y的偏移量
+					this.vr = 0.5;
+					this.a = 1;//透明度
+					this.va = 0.96;
+					this.text = getText();
+					// this.l = random(h * 0.8, h * 0.9);//最大距离
+					this.l = random(h * 0.1, h * 0.2);//最大距离
+				},
+				draw: function() {
+								
+					if (this.y < this.l) {	//原来的：this.y > this.l
+						// ctx.beginPath();
+						// ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+						ctx.save();
+						ctx.shadowBlur = 1;
+						ctx.shadowColor = "#fff";
+						
+						ctx.strokeStyle = 'rgba(19,70,149,' + this.a + ')';
+						ctx.font = this.r+"px" + " Georgia";
+						ctx.textAlign = "center";
+						ctx.strokeText(this.text,this.x,this.y);
+						ctx.stroke();
+						ctx.restore();
+					} else {
+						ctx.fillStyle = color(this.a);
+						ctx.fillRect(this.x, this.y, 2, 10);
+					}
+					this.update();
+				},
+				update: function() {
+					if (this.y > this.l) {	//原来的this.y < this.l
+						// this.x += this.vy;
+						this.y -= this.vy;	//原来的+=
+					} else {
+						if (this.a > 0.03) {
+							this.r += this.vr;
+							if (this.r > 50) {
+								this.a *= this.va;
+							}
+						} else {
+							this.init();
+						}
+					}
+				}
+			}
+			
+			function getText(){
+				let textArr = ["❤","芋泥","满眼","星辰","⭐","都是你","剩下的盛夏","烟火","予你","能让我狂奔的","除了大雨","就只有你了","注定要去的地方","多晚都有光","生活需要","你的可爱","因你是","美好的存在","晚是世界的晚","安是给你的安","❤"];	
+				return textArr[Math.floor(Math.random()*textArr.length)];
+			}
+			function move() {	//主循环
+				ctx.fillStyle = 'rgba(0,0,0,.1)';
+				ctx.fillRect(0, 0, w, h);
+				
+				for (var i = 0; i < drops.length; i++) {
+					drops[i].draw();
+				}
+				
+				
+				 starlist.forEach((item,i)=>{
+				 item.draw();
+				 if(item.a<0.05){
+				 starlist.splice(i,1);
+				 }
+				 })
+				requestAnimationFrame(move);
+			};
+
+			function setup() {
+				for (var i = 0; i < count; i++) {
+					(function(j) {
+						setTimeout(function() {
+							var drop = new Drop();
+							drop.init();
+							drops.push(drop);
+						}, j * 200);
+					}(i))
+				}
+			};
+			setup();
+			move();
+
+			function random(min, max) {
+				return Math.random() * (max - min) + min;
+			};
+
+			function color(a) {	//随机颜色
+				var r = Math.floor(Math.random() * 255);
+				var g = Math.floor(Math.random() * 255);
+				var b = Math.floor(Math.random() * 255);
+				return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+			};
+			// document.addEventListener('touchstart', function() {
+			// 	document.getElementById("audio").play();
+			// })
+			window.onload = function(){
+				document.getElementById("audio").play();
+			}
+			
+			//鼠标经过处粒子效果
+			canvas.addEventListener('mousemove',function(e){
+			 starlist.push(new Star(e.offsetX,e.offsetY));
+			 // console.log(starlist)
+			})
+			
+			
+			// function random(min,max){
+			//  return Math.floor((max-min)*Math.random()+ min);
+			// }
+			
+			
+			function Star(x,y){
+			 this.x = x;
+			 this.y = y;
+			 this.vx = (Math.random()-0.5)*2.5;
+			 this.vy = (Math.random()-0.5)*2.5;
+			 this.color = 'rgb('+random(0,200)+','+random(0,200)+','+random(0,200)+')';
+			 this.a = 1;
+			 // console.log(this.color);
+			 this.draw();
+			}
+			Star.prototype={
+			 draw:function(){
+			 ctx.save();
+			 ctx.beginPath();
+			 ctx.fillStyle = this.color;
+			 ctx.globalCompositeOperation='lighter'
+			 ctx.globalAlpha= this.a;
+			 ctx.arc(this.x,this.y,3,0,Math.PI*2,false);	//本次版本画圆简单些
+			 ctx.fill();
+			 ctx.restore();
+			 this.updata();
+			 },
+			 updata(){
+			 this.x+=this.vx;
+			 this.y+=this.vy;
+			 this.a*=.975;
+			 }
+			}
+			
+			let meshow = false;
+			document.getElementById("canvas").ondblclick = function(){
+				document.getElementById("me").style.display = "block";
+				meshow = true;
+			}
+			document.getElementById("me").onclick = function(){
+				if (meshow = true) {
+					document.getElementById("dialog").style.display = "block";
+				}
+			}
+			
+			
+		</script>
+		
+	</body>
+</html>
